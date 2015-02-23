@@ -32,13 +32,14 @@ public class FileImportRoutes extends RouteBuilder {
                 .routeId( "read-order" )
                         // log header parameter CamelFileName, set by the file producer
                 .log( LoggingLevel.INFO, "Reading file: ${header.CamelFileName}" )
-                        // before: InputStream, after logging, would not point to the beginning, thus convert to String
+                        // message body before: InputStream: after logging the stream would already be consumed, thus convert to String,
+                        // to be able to log and then unmarshal
                 .convertBodyTo( String.class )
-                        // log the message body (now the file content)
+                        // log the message body (now the file content as String)
                 .log( LoggingLevel.INFO, "Content: ${body}" )
-                        // unmarshal from XML to Java using JAXB
+                        // unmarshal from XML to Java using JAXB; the file jaxb.index must reside in the same package as the JAXB classes
                 .unmarshal().jaxb( Order.class.getPackage().getName() )
-                // log the message body (now instance of Order)
+                        // log the message body (now instance of class Order)
                 .log( LoggingLevel.INFO, "Unmarshalled order: ${body}" )
                         // call bean
                 .bean( SaveOrderBean.class ).id( "save-order-bean" );
@@ -53,6 +54,9 @@ public class FileImportRoutes extends RouteBuilder {
             orderService.saveOrder( order );
         }
 
+        /**
+         * Need to do a lookup, with CDI we could simply inject the EJB
+         */
         protected OrderService getOrderService() throws NamingException {
             // we are in the container, look up Service (EJB) in JNDI
             InitialContext initialContext = new InitialContext();
