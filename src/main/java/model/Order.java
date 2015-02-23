@@ -16,8 +16,8 @@ public class Order {
     }
 
     @XmlElement
-    public void setOrderNumber( String orderNumer ) {
-        this.orderNumber = orderNumer;
+    public void setOrderNumber( String orderNumber ) {
+        this.orderNumber = orderNumber;
     }
 
     @Override
